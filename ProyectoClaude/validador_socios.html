@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Validador de Socios — Ateneo</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    /* ── Reset & Variables ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #0f1117;
+      --surface:  #1a1d27;
+      --card:     #22263a;
+      --border:   #2e3350;
+      --accent:   #6c63ff;
+      --accent2:  #a78bfa;
+      --green:    #22c55e;
+      --red:      #ef4444;
+      --yellow:   #f59e0b;
+      --text:     #e2e8f0;
+      --muted:    #94a3b8;
+      --radius:   14px;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 20px 60px;
+    }
+
+    /* ── Header ── */
+    header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+    header .badge {
+      display: inline-block;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #fff;
+      font-size: .75rem;
+      font-weight: 600;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      padding: 4px 14px;
+      border-radius: 999px;
+      margin-bottom: 14px;
+    }
+    header h1 {
+      font-size: clamp(1.8rem, 4vw, 2.6rem);
+      font-weight: 700;
+      background: linear-gradient(135deg, #fff 30%, var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1.2;
+    }
+    header p {
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: .95rem;
+    }
+
+    /* ── Main grid ── */
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      width: 100%;
+      max-width: 960px;
+    }
+    @media (max-width: 640px) { .grid { grid-template-columns: 1fr; } }
+
+    /* ── Card ── */
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px;
+      transition: transform .2s, box-shadow .2s;
+    }
+    .card:hover { transform: translateY(-3px); box-shadow: 0 12px 40px rgba(0,0,0,.4); }
+    .card h2 {
+      font-size: 1rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 18px;
+    }
+    .card h2 .dot {
+      width: 10px; height: 10px; border-radius: 50%;
+      display: inline-block;
+    }
+    .dot-green  { background: var(--green); box-shadow: 0 0 8px var(--green); }
+    .dot-red    { background: var(--red);   box-shadow: 0 0 8px var(--red); }
+    .dot-purple { background: var(--accent); box-shadow: 0 0 8px var(--accent); }
+    .dot-yellow { background: var(--yellow); box-shadow: 0 0 8px var(--yellow); }
+
+    /* ── Textarea / Input ── */
+    textarea, input[type="text"] {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      font-family: 'Inter', monospace;
+      font-size: .88rem;
+      padding: 12px 14px;
+      resize: vertical;
+      outline: none;
+      transition: border-color .2s;
+    }
+    textarea:focus, input[type="text"]:focus { border-color: var(--accent); }
+    textarea { min-height: 160px; }
+
+    /* ── Buttons ── */
+    .btn-row { display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
+    button {
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      font-weight: 600;
+      font-size: .88rem;
+      border: none;
+      border-radius: 10px;
+      padding: 10px 22px;
+      transition: opacity .2s, transform .15s;
+    }
+    button:hover { opacity: .88; transform: translateY(-1px); }
+    button:active { transform: translateY(0); }
+    .btn-primary { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; }
+    .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
+    .btn-green   { background: var(--green); color: #fff; }
+    .btn-red     { background: var(--red);   color: #fff; }
+
+    /* ── Stats ── */
+    .stats {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .stat {
+      flex: 1;
+      min-width: 80px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 10px;
+      text-align: center;
+    }
+    .stat .num {
+      font-size: 1.8rem;
+      font-weight: 700;
+      line-height: 1;
+    }
+    .stat .lbl { font-size: .72rem; color: var(--muted); margin-top: 4px; text-transform: uppercase; letter-spacing: .05em; }
+    .num-total  { color: var(--accent2); }
+    .num-valid  { color: var(--green); }
+    .num-invalid{ color: var(--red); }
+
+    /* ── List ── */
+    .email-list {
+      list-style: none;
+      max-height: 220px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+    .email-list::-webkit-scrollbar { width: 5px; }
+    .email-list::-webkit-scrollbar-track { background: transparent; }
+    .email-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+
+    .email-list li {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 10px;
+      border-radius: 8px;
+      font-size: .85rem;
+      transition: background .15s;
+      word-break: break-all;
+    }
+    .email-list li:hover { background: var(--surface); }
+    .email-list li .icon { flex-shrink: 0; font-size: 1rem; }
+    .empty-msg { color: var(--muted); font-size: .88rem; text-align: center; padding: 20px 0; }
+
+    /* ── Regex card (full width) ── */
+    .full-width { grid-column: 1 / -1; }
+    .regex-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 18px;
+      font-family: monospace;
+      font-size: .9rem;
+      color: var(--accent2);
+      word-break: break-all;
+      user-select: all;
+    }
+    .rule-list { list-style: none; margin-top: 14px; display: flex; flex-direction: column; gap: 8px; }
+    .rule-list li {
+      display: flex; align-items: flex-start; gap: 10px;
+      font-size: .85rem; color: var(--muted);
+    }
+    .rule-list li span.tag {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 2px 8px;
+      font-size: .78rem;
+      color: var(--accent2);
+      white-space: nowrap;
+    }
+
+    /* ── Log ── */
+    #log {
+      background: #0a0c14;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 16px;
+      font-family: monospace;
+      font-size: .82rem;
+      color: #7dd3fc;
+      min-height: 80px;
+      max-height: 160px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+    }
+    .log-ok   { color: var(--green); }
+    .log-err  { color: var(--red); }
+    .log-info { color: var(--muted); }
+
+    /* ── Pill ── */
+    .pill {
+      display: inline-block;
+      padding: 2px 10px;
+      border-radius: 999px;
+      font-size: .72rem;
+      font-weight: 600;
+    }
+    .pill-green { background: rgba(34,197,94,.15); color: var(--green); border: 1px solid rgba(34,197,94,.3); }
+    .pill-red   { background: rgba(239,68,68,.15);  color: var(--red);   border: 1px solid rgba(239,68,68,.3); }
+
+    /* ── Drop Zone ── */
+    .drop-zone {
+      border: 2px dashed var(--border);
+      border-radius: 10px;
+      padding: 28px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color .2s, background .2s;
+      position: relative;
+    }
+    .drop-zone:hover, .drop-zone.dragover {
+      border-color: var(--accent);
+      background: rgba(108,99,255,.07);
+    }
+    .drop-zone input[type="file"] {
+      position: absolute; inset: 0;
+      opacity: 0; cursor: pointer;
+      width: 100%; height: 100%;
+    }
+    .drop-zone .dz-icon { font-size: 2.2rem; margin-bottom: 8px; }
+    .drop-zone .dz-label { font-size: .9rem; color: var(--muted); }
+    .drop-zone .dz-label strong { color: var(--accent2); }
+    .drop-zone .dz-hint { font-size: .75rem; color: var(--border); margin-top: 6px; }
+    #dz-filename {
+      margin-top: 12px;
+      font-size: .82rem;
+      color: var(--green);
+      min-height: 1.2em;
+      word-break: break-all;
+    }
+
+    /* ── Animations ── */
+    @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
+    .animate-in { animation: fadeIn .35s ease both; }
+  </style>
+</head>
+<body>
+
+<!-- ── Header ── -->
+<header>
+  <div class="badge">🏛️ Ateneo</div>
+  <h1>Validador de Socios</h1>
+  <p>Pega emails, uno por línea, y valídalos al instante en el navegador</p>
+</header>
+
+<div class="grid">
+
+  <!-- ── CSV IMPORT ── -->
+  <div class="card animate-in full-width" style="animation-delay:.02s">
+    <h2><span class="dot dot-purple"></span> Importar CSV</h2>
+    <div class="drop-zone" id="dropZone">
+      <input type="file" id="csvFileInput" accept=".csv,text/csv" />
+      <div class="dz-icon">📂</div>
+      <div class="dz-label">Arrastra tu CSV aquí o <strong>haz clic para seleccionarlo</strong></div>
+      <div class="dz-hint">El archivo debe tener una columna llamada <code>email</code> (o <code>nombre,email,telefono</code>)</div>
+    </div>
+    <div id="dz-filename"></div>
+  </div>
+
+  <!-- ── INPUT ── -->
+  <div class="card animate-in" style="animation-delay:.05s">
+    <h2><span class="dot dot-purple"></span> Correos a validar</h2>
+    <textarea id="emailInput" placeholder="carlos@gmail.com&#10;usuario invalido&#10;test@dominio.es&#10;..."></textarea>
+    <div class="btn-row">
+      <button class="btn-primary" onclick="validar()">▶ Validar</button>
+      <button class="btn-outline" onclick="cargarEjemplo()">📋 Cargar ejemplo</button>
+      <button class="btn-outline" onclick="limpiar()">🗑 Limpiar</button>
+    </div>
+  </div>
+
+  <!-- ── STATS ── -->
+  <div class="card animate-in" style="animation-delay:.1s">
+    <h2><span class="dot dot-yellow"></span> Resumen</h2>
+    <div class="stats">
+      <div class="stat"><div class="num num-total" id="statTotal">0</div><div class="lbl">Total</div></div>
+      <div class="stat"><div class="num num-valid"  id="statValidos">0</div><div class="lbl">Válidos</div></div>
+      <div class="stat"><div class="num num-invalid" id="statInvalidos">0</div><div class="lbl">Inválidos</div></div>
+    </div>
+    <div id="log">▸ Esperando correos para validar…</div>
+    <div class="btn-row" style="margin-top:14px">
+      <button class="btn-green" onclick="exportar('validos')">⬇ Exportar válidos</button>
+      <button class="btn-red"   onclick="exportar('invalidos')">⬇ Exportar inválidos</button>
+    </div>
+  </div>
+
+  <!-- ── VÁLIDOS ── -->
+  <div class="card animate-in" style="animation-delay:.15s">
+    <h2><span class="dot dot-green"></span> Correos válidos</h2>
+    <ul class="email-list" id="listaValidos">
+      <li class="empty-msg">— Sin resultados aún —</li>
+    </ul>
+  </div>
+
+  <!-- ── INVÁLIDOS ── -->
+  <div class="card animate-in" style="animation-delay:.2s">
+    <h2><span class="dot dot-red"></span> Correos inválidos</h2>
+    <ul class="email-list" id="listaInvalidos">
+      <li class="empty-msg">— Sin resultados aún —</li>
+    </ul>
+  </div>
+
+  <!-- ── REGEX INFO ── -->
+  <div class="card full-width animate-in" style="animation-delay:.25s">
+    <h2><span class="dot dot-purple"></span> Expresión regular utilizada</h2>
+    <div class="regex-box">/^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,6}$/</div>
+    <ul class="rule-list">
+      <li><span class="tag">^…$</span> Ancla inicio y fin — el email completo debe coincidir</li>
+      <li><span class="tag">[^\s@]+</span> Parte local: uno o más caracteres que no sean espacio ni @</li>
+      <li><span class="tag">@</span> Exactamente un arroba</li>
+      <li><span class="tag">[^\s@]+\.</span> Dominio con al menos un punto</li>
+      <li><span class="tag">[a-zA-Z]{2,6}</span> Extensión (TLD) entre 2 y 6 letras</li>
+      <li><span class="tag">/\s/</span> Comprobación extra: ningún espacio en cualquier posición</li>
+    </ul>
+  </div>
+
+</div><!-- /grid -->
+
+<script>
+  // ── Misma regex que el script Node.js ──────────────────────
+  const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,6}$/;
+
+  function esEmailValido(email) {
+    if (/\s/.test(email)) return false;
+    const partes = email.split('@');
+    if (partes.length !== 2) return false;
+    if (!partes[1].includes('.')) return false;
+    return EMAIL_REGEX.test(email);
+  }
+
+  // ── Estado global ───────────────────────────────────────────
+  let resultados = { validos: [], invalidos: [] };
+
+  // ── Validar ─────────────────────────────────────────────────
+  function validar() {
+    const raw = document.getElementById('emailInput').value.trim();
+    if (!raw) { log('⚠ Introduce al menos un correo.', 'log-err'); return; }
+
+    const emails = raw.split('\n').map(e => e.trim()).filter(e => e !== '');
+    resultados.validos   = [];
+    resultados.invalidos = [];
+
+    emails.forEach(email => {
+      (esEmailValido(email) ? resultados.validos : resultados.invalidos).push(email);
+    });
+
+    renderStats(emails.length);
+    renderLista('listaValidos',   resultados.validos,   '✅', 'pill-green');
+    renderLista('listaInvalidos', resultados.invalidos, '❌', 'pill-red');
+
+    log(
+      `✔ Procesados: ${emails.length} | ` +
+      `Válidos: ${resultados.validos.length} | ` +
+      `Inválidos: ${resultados.invalidos.length}`,
+      'log-ok'
+    );
+  }
+
+  // ── Renderizar estadísticas ─────────────────────────────────
+  function renderStats(total) {
+    animNum('statTotal',    total);
+    animNum('statValidos',  resultados.validos.length);
+    animNum('statInvalidos',resultados.invalidos.length);
+  }
+
+  function animNum(id, target) {
+    const el = document.getElementById(id);
+    let cur = 0;
+    const step = Math.ceil(target / 20);
+    const iv = setInterval(() => {
+      cur = Math.min(cur + step, target);
+      el.textContent = cur;
+      if (cur >= target) clearInterval(iv);
+    }, 30);
+  }
+
+  // ── Renderizar lista ────────────────────────────────────────
+  function renderLista(id, arr, icon, pillClass) {
+    const ul = document.getElementById(id);
+    if (arr.length === 0) {
+      ul.innerHTML = '<li class="empty-msg">— Sin resultados —</li>';
+      return;
+    }
+    ul.innerHTML = arr.map(e =>
+      `<li>
+        <span class="icon">${icon}</span>
+        <span>${e}</span>
+        <span class="pill ${pillClass}" style="margin-left:auto">${icon === '✅' ? 'OK' : 'ERR'}</span>
+      </li>`
+    ).join('');
+  }
+
+  // ── Log ─────────────────────────────────────────────────────
+  function log(msg, cls = '') {
+    const el = document.getElementById('log');
+    el.innerHTML = `<span class="${cls}">${msg}</span>`;
+  }
+
+  // ── Exportar CSV ────────────────────────────────────────────
+  function exportar(tipo) {
+    const lista = resultados[tipo];
+    if (!lista || lista.length === 0) {
+      log(`⚠ No hay correos ${tipo} para exportar.`, 'log-err');
+      return;
+    }
+    const csv  = 'email\n' + lista.join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href     = url;
+    a.download = `emails_${tipo}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    log(`⬇ Descargando emails_${tipo}.csv (${lista.length} registros)`, 'log-ok');
+  }
+
+  // ── Cargar ejemplo ──────────────────────────────────────────
+  function cargarEjemplo() {
+    document.getElementById('emailInput').value = [
+      'carlos.garcia@gmail.com',
+      'ana.martinez@hotmail.es',
+      'usuario con espacios@dominio.com',
+      'noarrobadominio.com',
+      'correo@sinextension',
+      'juan.perez@empresa.co',
+      '@dominiovalido.org',
+      'invalido@.com',
+      'maria_lopez+ateneo@correo.org',
+      'correo@dominio.toolongextension',
+      'pedro.123@sub.dominio.net',
+      'test@test.io',
+      'email_doble@@dominio.es',
+      'valido123@universidad.edu',
+      'sinpunto@dominiosinpunto',
+      'info@ateneo.cultura.es',
+      'admin@local.dev',
+    ].join('\n');
+    log('📋 Ejemplo cargado. Pulsa ▶ Validar.', 'log-info');
+  }
+
+  // ── Limpiar ─────────────────────────────────────────────────
+  function limpiar() {
+    document.getElementById('emailInput').value = '';
+    document.getElementById('dz-filename').textContent = '';
+    ['statTotal','statValidos','statInvalidos'].forEach(id => document.getElementById(id).textContent = '0');
+    document.getElementById('listaValidos').innerHTML   = '<li class="empty-msg">— Sin resultados aún —</li>';
+    document.getElementById('listaInvalidos').innerHTML = '<li class="empty-msg">— Sin resultados aún —</li>';
+    resultados = { validos: [], invalidos: [] };
+    log('▸ Esperando correos para validar…', '');
+  }
+
+  // ── Importar CSV ─────────────────────────────────────────────
+  function parsearCSV(texto) {
+    const lineas = texto
+      .split(/\r?\n/)
+      .map(l => l.trim())
+      .filter(l => l !== '');
+
+    if (lineas.length === 0) {
+      log('⚠ El CSV está vacío.', 'log-err');
+      return;
+    }
+
+    // Detectar columna email de forma dinámica
+    const cabecera = lineas[0].split(',').map(c => c.trim().toLowerCase());
+    const idx = cabecera.indexOf('email');
+
+    let emails;
+    if (idx !== -1) {
+      // Tiene cabecera → extraer columna email de las filas de datos
+      emails = lineas.slice(1)
+        .map(l => (l.split(',')[idx] || '').trim())
+        .filter(e => e !== '');
+    } else {
+      // Sin cabecera reconocida → asumir que cada línea ES un email
+      emails = lineas.map(l => l.trim()).filter(e => e !== '');
+    }
+
+    if (emails.length === 0) {
+      log('⚠ No se encontraron emails en el CSV.', 'log-err');
+      return;
+    }
+
+    document.getElementById('emailInput').value = emails.join('\n');
+    log(`📂 CSV importado: ${emails.length} correos cargados. Pulsa ▶ Validar.`, 'log-ok');
+  }
+
+  function cargarArchivo(file) {
+    if (!file) return;
+    if (!file.name.endsWith('.csv') && file.type !== 'text/csv') {
+      log('⚠ Solo se aceptan archivos .csv', 'log-err');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = e => {
+      document.getElementById('dz-filename').textContent = '✔ ' + file.name;
+      parsearCSV(e.target.result);
+    };
+    reader.readAsText(file, 'utf-8');
+  }
+
+  // Eventos del drop-zone
+  const dz  = document.getElementById('dropZone');
+  const inp = document.getElementById('csvFileInput');
+
+  inp.addEventListener('change', () => cargarArchivo(inp.files[0]));
+
+  dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('dragover'); });
+  dz.addEventListener('dragleave', () => dz.classList.remove('dragover'));
+  dz.addEventListener('drop', e => {
+    e.preventDefault();
+    dz.classList.remove('dragover');
+    cargarArchivo(e.dataTransfer.files[0]);
+  });
+</script>
+</body>
+</html>

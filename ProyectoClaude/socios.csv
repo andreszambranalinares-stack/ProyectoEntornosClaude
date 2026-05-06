@@ -1,0 +1,21 @@
+nombre,email,telefono
+Carlos García,carlos.garcia@gmail.com,600111222
+Ana Martínez,ana.martinez@hotmail.es,611222333
+Luis Blanco,usuario con espacios@dominio.com,622333444
+Marta Ruiz,noarrobadominio.com,633444555
+Pedro Sanz,correo@sinextension,644555666
+Juan Pérez,juan.perez@empresa.co,655666777
+Sin Nombre,@dominiovalido.org,666777888
+Raquel Vega,invalido@.com,677888999
+María López,maria_lopez+ateneo@correo.org,688999000
+Roberto Gil,correo@dominio.toolongextension,699000111
+Pedro Alonso,pedro.123@sub.dominio.net,700111222
+Espacio Inicio,   espacioinicio@test.com,711222333
+Tester Uno,test@test.io,722333444
+Doble Arroba,email_doble@@dominio.es,733444555
+Valido Uni,valido123@universidad.edu,744555666
+Sin Punto,sinpunto@dominiosinpunto,755666777
+Info Ateneo,info@ateneo.cultura.es,766777888
+Solo Arroba,@,777888999
+Sin Dominio,nodomain@,788999000
+Admin Dev,admin@local.dev,799000111
